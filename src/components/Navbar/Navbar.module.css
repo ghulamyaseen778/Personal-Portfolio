@@ -1,0 +1,131 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 18px 8%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 9999;
+  transition: 0.3s;
+}
+
+/* GLASS EFFECT ON SCROLL */
+.scrolled {
+  background: rgba(10, 12, 25, 0.6);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* LOGO */
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+}
+
+.logo span {
+  color: #6d5dfb;
+}
+
+/* NAV LINKS */
+.nav {
+  display: flex;
+  gap: 28px;
+}
+
+.nav a {
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  font-size: 14px;
+  position: relative;
+  transition: 0.3s;
+}
+
+.nav a:hover {
+  color: white;
+}
+
+/* ACTIVE LINK */
+.active {
+  color: white !important;
+}
+
+.active::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg,#6d5dfb,#00e5ff);
+}
+
+/* ACTIONS */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.resume {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: white;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.cta {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg,#6d5dfb,#00e5ff);
+  color: white;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+/* MOBILE BUTTON */
+.menuBtn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 22px;
+}
+
+/* MOBILE MENU */
+.mobileMenu {
+  position: absolute;
+  top: 70px;
+  right: 8%;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mobileMenu a {
+  color: white;
+  text-decoration: none;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .nav {
+    display: none;
+  }
+
+  .menuBtn {
+    display: block;
+  }
+}

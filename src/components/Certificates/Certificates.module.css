@@ -1,0 +1,221 @@
+.section{
+    padding:140px 8%;
+}
+
+.label{
+    color:#7C8CFF;
+    letter-spacing:4px;
+    font-size:13px;
+    text-transform:uppercase;
+}
+
+.heading{
+    margin-top:14px;
+    font-size:54px;
+    font-weight:700;
+}
+
+.description{
+    margin-top:20px;
+    max-width:720px;
+    line-height:1.8;
+    color:#9CA3AF;
+}
+
+.grid{
+
+    margin-top:70px;
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(340px,1fr));
+
+    gap:30px;
+}
+
+.card{
+
+    position:relative;
+
+    overflow:hidden;
+
+    border-radius:28px;
+
+    padding:35px;
+
+    backdrop-filter:blur(24px);
+
+    background:
+    linear-gradient(
+    180deg,
+    rgba(255,255,255,.06),
+    rgba(255,255,255,.03));
+
+    border:1px solid rgba(255,255,255,.08);
+
+    transition:.35s;
+}
+
+.card:hover{
+
+    transform:translateY(-8px);
+
+    border-color:#6d5dfb;
+
+    box-shadow:
+
+    0 30px 70px rgba(0,0,0,.45),
+
+    0 0 80px rgba(109,93,251,.18);
+
+}
+
+.shine{
+
+    position:absolute;
+
+    top:-120%;
+
+    left:-60%;
+
+    width:80px;
+
+    height:250%;
+
+    transform:rotate(25deg);
+
+    background:rgba(255,255,255,.08);
+
+    transition:.8s;
+}
+
+.card:hover .shine{
+
+    left:150%;
+}
+
+.icon{
+
+    width:74px;
+
+    height:74px;
+
+    border-radius:22px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:34px;
+
+    margin-bottom:26px;
+
+    background:
+
+    linear-gradient(
+    135deg,
+    rgba(109,93,251,.25),
+    rgba(0,229,255,.18));
+
+    color:#7C8CFF;
+
+    box-shadow:
+    0 0 50px rgba(109,93,251,.28);
+}
+
+.organization{
+
+    margin:10px 0;
+
+    color:#7C8CFF;
+}
+
+.meta{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    margin:24px 0;
+
+    color:#9CA3AF;
+
+    font-size:14px;
+}
+
+.meta span{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+}
+
+.skills{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+}
+
+.skills span{
+
+    padding:7px 14px;
+
+    border-radius:999px;
+
+    background:rgba(255,255,255,.06);
+
+    font-size:12px;
+}
+
+.button{
+
+    margin-top:30px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:10px;
+
+    width:100%;
+
+    padding:15px;
+
+    border-radius:16px;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+    color:white;
+
+    background:
+    linear-gradient(
+    135deg,
+    #6d5dfb,
+    #00d4ff);
+
+    transition:.3s;
+}
+
+.button:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+    0 10px 35px rgba(109,93,251,.35);
+}

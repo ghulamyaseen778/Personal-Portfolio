@@ -1,0 +1,17 @@
+.loader {
+  position: fixed;
+  inset: 0;
+  background: #040816;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  color: white;
+}
+
+.loader h1 {
+  font-size: 40px;
+  background: linear-gradient(90deg,#6d5dfb,#00e5ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
