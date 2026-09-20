@@ -8,6 +8,7 @@ export interface BlogPost {
   readTime: string;
   date: string;
   tags: string[];
+  cover?: string;
   featured?: boolean;
   content: ReactNode;
 }
