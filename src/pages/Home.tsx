@@ -4,7 +4,6 @@ import {
   FiArrowDownRight,
   FiArrowUpRight,
   FiAward,
-  FiBox,
   FiBriefcase,
   FiCheck,
   FiCode,
