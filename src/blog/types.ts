@@ -1,21 +1,23 @@
+import type { ReactNode } from "react";
+
 export interface BlogPost {
   slug: string;
   title: string;
   description: string;
   category: string;
-  cover: string;
   readTime: string;
   date: string;
   tags: string[];
+  cover?: string;
   featured?: boolean;
-  content: React.ReactNode;
+  content: ReactNode;
 }
 
 export const categories = [
   "All",
+  "DevOps",
+  "Database",
   "Frontend",
   "Backend",
-  "AI",
-  "DevOps",
-  "Database"
+  "AI"
 ];

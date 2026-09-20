@@ -1,238 +1,320 @@
-/* =========================
-   MAIN PAGE WRAPPER
-========================= */
-
-.page {
-  padding: 140px 8%;
-  color: white;
+.page,
+.articlePage {
+  min-height: 100vh;
+  color: #f7f9fc;
+  background:
+    radial-gradient(circle at 85% 8%, rgba(125,211,252,.08), transparent 30%),
+    radial-gradient(circle at 10% 55%, rgba(167,139,250,.06), transparent 32%),
+    #06080d;
 }
 
-/* =========================
-   HEADER SECTION
-========================= */
+.topbar,
+.blogHero,
+.categories,
+.grid,
+.articleWrapper {
+  width: min(1120px, calc(100% - 40px));
+  margin-left: auto;
+  margin-right: auto;
+}
 
-.header {
+.topbar {
+  padding: 28px 0;
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  gap: 40px;
-  margin-bottom: 50px;
+  gap: 20px;
 }
 
-.titleBox {
-  max-width: 700px;
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #9ca6b4;
+  font-size: 12px;
+}
+
+.blogHero {
+  padding: 105px 0 68px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
 }
 
 .subtitle {
-  color: #7c8cff;
-  letter-spacing: 3px;
-  font-size: 13px;
+  color: #7dd3fc;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: .13em;
   text-transform: uppercase;
 }
 
-.title {
-  margin-top: 12px;
-  font-size: 52px;
-  line-height: 1.1;
+.blogHero h1,
+.articleHeader h1 {
+  font-family: "Sora", sans-serif;
+  letter-spacing: -.055em;
 }
 
-.desc {
+.blogHero h1 {
   margin-top: 18px;
-  color: #9ca3af;
+  max-width: 920px;
+  font-size: clamp(3rem, 6vw, 6.4rem);
+  line-height: 1;
+}
+
+.blogHero p {
+  margin-top: 25px;
+  max-width: 700px;
+  color: #929dab;
+  font-size: 15px;
   line-height: 1.8;
 }
 
-/* =========================
-   VIEW ALL LINK
-========================= */
-
-.viewAll {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: white;
-  font-weight: 600;
-  transition: 0.3s;
-  white-space: nowrap;
-}
-
-.viewAll:hover {
-  transform: translateX(6px);
-}
-
-/* =========================
-   CATEGORIES
-========================= */
-
 .categories {
+  padding: 30px 0 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 40px;
+  gap: 7px;
 }
 
 .categories button {
-  padding: 10px 16px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,.08);
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: transparent;
-  color: #9ca3af;
-  cursor: pointer;
-  transition: 0.3s;
+  background: rgba(255,255,255,.025);
+  color: #818c9b;
+  font: inherit;
+  font-size: 11px;
 }
 
-.categories button:hover {
-  color: white;
-  border-color: rgba(124,140,255,0.5);
+.categories .active {
+  color: #071017;
+  background: #dff6ff;
+  border-color: transparent;
 }
-
-.active {
-  background: linear-gradient(135deg, #6d5dfb, #00e5ff);
-  color: white !important;
-  border: none;
-}
-
-/* =========================
-   GRID
-========================= */
 
 .grid {
+  padding: 30px 0 90px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 26px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
 }
 
-/* =========================
-   CARD
-========================= */
-
 .card {
+  min-height: 330px;
+  padding: 28px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-
-  position: relative;
-  overflow: hidden;
-
-  border-radius: 24px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-
-  text-decoration: none;
-  color: white;
-
-  transition: 0.35s ease;
-
-  padding: 26px;
-  min-height: 200px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 21px;
+  background: rgba(255,255,255,.024);
+  transition: .2s ease;
 }
 
 .card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(124,140,255,0.6);
-  box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+  transform: translateY(-5px);
+  border-color: rgba(125,211,252,.23);
+  background: rgba(255,255,255,.04);
 }
 
-/* =========================
-   CARD CONTENT
-========================= */
-
-.category {
-  font-size: 12px;
-  color: #7c8cff;
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.card h3 {
-  font-size: 20px;
-  margin-bottom: 10px;
-}
-
-.card p {
-  color: #9ca3af;
-  line-height: 1.6;
-  font-size: 14px;
-}
-
-/* =========================
-   META
-========================= */
-
-.meta {
+.cardTop,
+.cardFooter {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-top: 20px;
+  gap: 14px;
+  color: #6f7a89;
+  font: 9px "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.cardTop span:first-child { color: #7dd3fc; }
+
+.card h2 {
+  margin-top: 54px;
+  max-width: 520px;
+  font: 600 clamp(1.35rem, 2.4vw, 2rem) "Sora", sans-serif;
+  line-height: 1.35;
+  letter-spacing: -.03em;
+}
+
+.card > p {
+  margin-top: 15px;
+  color: #8994a3;
   font-size: 12px;
-  color: #6b7280;
+  line-height: 1.72;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 900px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .title {
-    font-size: 36px;
-  }
-  .articleWrapper{
-    padding: 120px 20px !important;
-  }
-}
-
-
-/* =========================
-   BLOG DETAIL PAGE FIX
-========================= */
+.cardFooter { margin-top: auto; padding-top: 26px; }
+.cardFooter svg { color: #cbd3de; font-size: 17px; }
 
 .articleWrapper {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 120px 0;
+  max-width: 920px;
+  padding: 80px 0 110px;
 }
 
-.cover {
-  width: 100%;
-  height: 420px;
-  object-fit: cover;
-  border-radius: 24px;
-  margin-bottom: 30px;
+.articleHeader {
+  padding-bottom: 54px;
+  border-bottom: 1px solid rgba(255,255,255,.075);
 }
 
-.meta {
+.articleMeta {
   display: flex;
-  gap: 12px;
-  align-items: center;
-  color: #9ca3af;
-  font-size: 13px;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  color: #778292;
+  font: 9px "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
 }
 
-.title {
-  font-size: 42px;
-  margin-bottom: 16px;
-  line-height: 1.2;
+.articleMeta span:first-child { color: #7dd3fc; }
+
+.articleHeader h1 {
+  margin-top: 24px;
+  font-size: clamp(2.8rem, 6vw, 5.4rem);
+  line-height: 1.03;
 }
 
-.desc {
-  color: #9ca3af;
+.articleHeader > p {
+  margin-top: 24px;
+  max-width: 780px;
+  color: #9aa5b3;
+  font-size: 15px;
   line-height: 1.8;
-  margin-bottom: 40px;
+}
+
+.tags {
+  margin-top: 25px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tags span {
+  padding: 7px 9px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  color: #8792a1;
+  font-size: 9px;
 }
 
 .content {
+  padding-top: 60px;
+  color: #a8b1be;
+  font-size: 15px;
   line-height: 1.9;
-  font-size: 16px;
-  /* padding: 0px 20px !important; */
 }
 
-.sectionGap {
-  margin-top: 60px;
+.content > p,
+.content > ul,
+.content > blockquote,
+.content > pre {
+  margin: 0 0 24px;
+}
+
+.content h2 {
+  margin: 64px 0 18px;
+  color: #f3f6fa;
+  font: 600 clamp(1.55rem, 3vw, 2.25rem) "Sora", sans-serif;
+  line-height: 1.25;
+  letter-spacing: -.03em;
+}
+
+.content h3 {
+  margin: 42px 0 14px;
+  color: #e6eaf0;
+  font: 600 1.15rem "Sora", sans-serif;
+}
+
+.content strong { color: #e5eaf1; }
+
+.content code:not(pre code) {
+  padding: 3px 6px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 6px;
+  color: #bdeaff;
+  background: rgba(125,211,252,.055);
+  font: 12px "JetBrains Mono", monospace;
+}
+
+.content pre {
+  margin: 22px 0 30px !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 18px 50px rgba(0,0,0,.22);
+  font-size: 12px !important;
+}
+
+.content blockquote {
+  padding: 19px 21px;
+  border-left: 3px solid #7dd3fc;
+  border-radius: 0 12px 12px 0;
+  background: rgba(125,211,252,.055);
+  color: #b4bfcc;
+}
+
+.content ul {
+  padding-left: 22px;
+}
+
+.content li + li { margin-top: 9px; }
+
+.related {
+  margin-top: 80px;
+  padding-top: 55px;
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+
+.relatedGrid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.relatedCard {
+  min-height: 190px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 17px;
+  background: rgba(255,255,255,.02);
+}
+
+.relatedCard > span {
+  color: #7dd3fc;
+  font: 9px "JetBrains Mono", monospace;
+  text-transform: uppercase;
+}
+
+.relatedCard h3 {
+  margin-top: 28px;
+  font: 600 16px "Sora", sans-serif;
+  line-height: 1.45;
+}
+
+.relatedCard svg { margin-top: auto; align-self: flex-end; color: #abb5c2; }
+
+.notFound {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  background: #06080d;
+  color: white;
+  text-align: center;
+}
+
+.notFound a { color: #7dd3fc; }
+
+@media (max-width: 720px) {
+  .grid, .relatedGrid { grid-template-columns: 1fr; }
+  .blogHero { padding: 72px 0 50px; }
+  .articleWrapper { padding: 55px 0 80px; }
+  .content { font-size: 14px; }
+  .content pre { font-size: 10px !important; }
+}
+
+@media (max-width: 480px) {
+  .topbar,.blogHero,.categories,.grid,.articleWrapper { width: min(100% - 28px, 1120px); }
 }
