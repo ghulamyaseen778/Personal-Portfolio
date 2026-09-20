@@ -1,71 +1,73 @@
-import { useParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { Link, useParams } from "react-router-dom";
+import { FiArrowLeft, FiArrowUpRight } from "react-icons/fi";
 import { blogs } from "../blog";
-import BlogLayout from "../layouts/BlogLayout";
-import RelatedPosts from "../components/Blog/RelatedPosts";
-import BlogNavigation from "../components/Blog/BlogNavigation";
 import styles from "../components/Blog/Blog.module.css";
 
 export default function BlogDetail() {
   const { slug } = useParams();
-
-  const blog = blogs.find((b) => b.slug === slug);
+  const blog = blogs.find((post) => post.slug === slug);
 
   if (!blog) {
     return (
-      <div style={{ padding: "120px", color: "white" }}>
-        Not Found
-      </div>
+      <main className={styles.notFound}>
+        <p>Article not found.</p>
+        <Link to="/blog">Back to articles</Link>
+      </main>
     );
   }
 
+  const related = blogs.filter((post) => post.slug !== blog.slug).slice(0, 2);
+
   return (
-    <BlogLayout>
+    <>
+      <Helmet>
+        <title>{blog.title} | Ghulam Yaseen</title>
+        <meta name="description" content={blog.description} />
+        <meta name="author" content="Muhammad Ghulam Yaseen" />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={blog.title} />
+        <meta property="og:description" content={blog.description} />
+      </Helmet>
 
-      <article className={styles.articleWrapper}>
+      <main className={styles.articlePage}>
+        <header className={styles.topbar}>
+          <Link to="/blog" className={styles.back}><FiArrowLeft /> All articles</Link>
+          <Link to="/" className={styles.back}>Portfolio <FiArrowUpRight /></Link>
+        </header>
 
-        {/* COVER */}
-        <img
-          src={blog.cover}
-          className={styles.cover}
-          alt={blog.title}
-        />
+        <article className={styles.articleWrapper}>
+          <header className={styles.articleHeader}>
+            <div className={styles.articleMeta}>
+              <span>{blog.category}</span>
+              <span>{blog.date}</span>
+              <span>{blog.readTime}</span>
+            </div>
+            <h1>{blog.title}</h1>
+            <p>{blog.description}</p>
+            <div className={styles.tags}>
+              {blog.tags.map((tag) => <span key={tag}>{tag}</span>)}
+            </div>
+          </header>
 
-        {/* META */}
-        <div className={styles.meta}>
-          <span>{blog.category}</span>
-          <span>•</span>
-          <span>{blog.date}</span>
-          <span>•</span>
-          <span>{blog.readTime}</span>
-        </div>
+          <div className={styles.content}>
+            {blog.content}
+          </div>
 
-        {/* TITLE */}
-        <h1 className={styles.title}>
-          {blog.title}
-        </h1>
-
-        {/* DESCRIPTION */}
-        <p className={styles.desc}>
-          {blog.description}
-        </p>
-
-        {/* CONTENT */}
-        <div className={styles.content}>
-          {blog.content}
-        </div>
-
-        {/* NAVIGATION */}
-        <div className={styles.sectionGap}>
-          <BlogNavigation currentSlug={slug!} />
-        </div>
-
-        {/* RELATED */}
-        <div className={styles.sectionGap}>
-          <RelatedPosts category={blog.category} />
-        </div>
-
-      </article>
-
-    </BlogLayout>
+          <section className={styles.related}>
+            <span className={styles.subtitle}>Continue reading</span>
+            <div className={styles.relatedGrid}>
+              {related.map((post) => (
+                <Link to={"/blog/" + post.slug} key={post.slug} className={styles.relatedCard}>
+                  <span>{post.category}</span>
+                  <h3>{post.title}</h3>
+                  <FiArrowUpRight />
+                </Link>
+              ))}
+            </div>
+          </section>
+        </article>
+      </main>
+    </>
   );
 }
