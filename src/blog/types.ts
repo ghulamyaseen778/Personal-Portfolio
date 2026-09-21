@@ -16,6 +16,7 @@ export interface BlogPost {
 export const categories = [
   "All",
   "DevOps",
+  "Networking",
   "Database",
   "Frontend",
   "Backend",
