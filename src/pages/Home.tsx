@@ -163,6 +163,14 @@ const aiSystems = [
 
 const articles = [
   {
+    category: "Networking",
+    readTime: "18 min read",
+    title: "IPsec Between VPS Servers",
+    description:
+      "Create a secure IKEv2 tunnel between service and database VPS servers, then scale the design to multiple isolated IPsec tunnels.",
+    href: "/blog/ipsec-vps-tunnel-single-multiple-servers"
+  },
+  {
     category: "DevOps",
     readTime: "18 min read",
     title: "VPS Server Setup From Zero",
@@ -177,14 +185,6 @@ const articles = [
     description:
       "Install MongoDB, create users, enable RBAC, configure permissions and keep the database private.",
     href: "/blog/mongodb-vps-ubuntu-setup"
-  },
-  {
-    category: "Frontend",
-    readTime: "6 min read",
-    title: "Building Enterprise React Applications",
-    description:
-      "A practical structure for React applications that need to stay understandable as features and teams grow.",
-    href: "/blog/react-enterprise"
   }
 ];
 
