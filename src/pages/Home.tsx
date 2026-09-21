@@ -163,6 +163,14 @@ const aiSystems = [
 
 const articles = [
   {
+    category: "DevOps",
+    readTime: "17 min read",
+    title: "Build a Load Balancer on a VPS with Nginx",
+    description:
+      "Use one Ubuntu VPS as an Nginx load balancer for multiple application servers, with HTTPS, failover behavior and high-availability options.",
+    href: "/blog/vps-load-balancer-nginx-multiple-servers"
+  },
+  {
     category: "Networking",
     readTime: "18 min read",
     title: "IPsec Between VPS Servers",
