@@ -164,6 +164,14 @@ const aiSystems = [
 const articles = [
   {
     category: "DevOps",
+    readTime: "22 min read",
+    title: "Production CI/CD with GitHub Actions & VPS",
+    description:
+      "Build once in GitHub Actions, publish an immutable Docker image to GHCR, then deploy securely to a VPS with health checks and automatic rollback.",
+    href: "/blog/production-ci-cd-github-actions-vps-docker"
+  },
+  {
+    category: "DevOps",
     readTime: "17 min read",
     title: "Build a Load Balancer on a VPS with Nginx",
     description:
