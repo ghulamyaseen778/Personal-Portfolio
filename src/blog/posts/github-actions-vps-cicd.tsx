@@ -212,16 +212,16 @@ sudo chown deploy:deploy /home/deploy/.ssh/authorized_keys`}
         code={`#!/usr/bin/env bash
 set -Eeuo pipefail
 
-COMMAND="${SSH_ORIGINAL_COMMAND:-}"
+COMMAND="\${SSH_ORIGINAL_COMMAND:-}"
 
-if [[ ! "${COMMAND}" =~ ^deploy[[:space:]]+(.+)$ ]]; then
+if [[ ! "\${COMMAND}" =~ ^deploy[[:space:]]+(.+)$ ]]; then
     echo "Deployment command rejected."
     exit 1
 fi
 
-IMAGE="${BASH_REMATCH[1]}"
+IMAGE="\${BASH_REMATCH[1]}"
 
-if [[ ! "${IMAGE}" =~ ^ghcr\.io/[a-z0-9._/-]+@sha256:[a-f0-9]{64}$ ]]; then
+if [[ ! "\${IMAGE}" =~ ^ghcr\.io/[a-z0-9._/-]+@sha256:[a-f0-9]{64}$ ]]; then
     echo "Invalid image reference."
     exit 1
 fi
@@ -236,12 +236,12 @@ cleanup() {
 
 trap cleanup EXIT
 
-printf '%s' "${GHCR_TOKEN}" \
+printf '%s' "\${GHCR_TOKEN}" \
   | docker login ghcr.io \
-      --username "${GHCR_USER}" \
+      --username "\${GHCR_USER}" \
       --password-stdin >/dev/null
 
-/opt/myapp/deploy.sh "${IMAGE}"`}
+/opt/myapp/deploy.sh "\${IMAGE}"`}
       />
       <CodeBlock
         language="bash"
@@ -411,7 +411,7 @@ README.md`}
         language="yaml"
         code={`services:
   app:
-    image: ${APP_IMAGE}
+    image: \${APP_IMAGE}
     container_name: myapp
     restart: unless-stopped
 
@@ -464,47 +464,47 @@ README.md`}
 set -Eeuo pipefail
 
 APP_DIR="/opt/myapp"
-IMAGE_ENV="${APP_DIR}/.image.env"
-STATE_DIR="${APP_DIR}/deployment-state"
-LOCK_FILE="${STATE_DIR}/deploy.lock"
+IMAGE_ENV="\${APP_DIR}/.image.env"
+STATE_DIR="\${APP_DIR}/deployment-state"
+LOCK_FILE="\${STATE_DIR}/deploy.lock"
 
-NEW_IMAGE="${1:-}"
+NEW_IMAGE="\${1:-}"
 
-if [[ -z "${NEW_IMAGE}" ]]; then
+if [[ -z "\${NEW_IMAGE}" ]]; then
     echo "Usage: deploy.sh <immutable-image>"
     exit 1
 fi
 
-mkdir -p "${STATE_DIR}"
+mkdir -p "\${STATE_DIR}"
 
-exec 9>"${LOCK_FILE}"
+exec 9>"\${LOCK_FILE}"
 if ! flock -n 9; then
     echo "Another deployment is already running."
     exit 1
 fi
 
-cd "${APP_DIR}"
+cd "\${APP_DIR}"
 
 PREVIOUS_IMAGE=""
-if [[ -f "${IMAGE_ENV}" ]]; then
-    PREVIOUS_IMAGE="$(sed -n 's/^APP_IMAGE=//p' "${IMAGE_ENV}" || true)"
+if [[ -f "\${IMAGE_ENV}" ]]; then
+    PREVIOUS_IMAGE="$(sed -n 's/^APP_IMAGE=//p' "\${IMAGE_ENV}" || true)"
 fi
 
 write_image_env() {
     local image="$1"
     local temp
-    temp="$(mktemp "${APP_DIR}/.image.env.XXXXXX")"
-    printf 'APP_IMAGE=%s\n' "${image}" > "${temp}"
-    mv "${temp}" "${IMAGE_ENV}"
+    temp="$(mktemp "\${APP_DIR}/.image.env.XXXXXX")"
+    printf 'APP_IMAGE=%s\n' "\${image}" > "\${temp}"
+    mv "\${temp}" "\${IMAGE_ENV}"
 }
 
-echo "Deploying: ${NEW_IMAGE}"
-echo "Previous: ${PREVIOUS_IMAGE:-none}"
+echo "Deploying: \${NEW_IMAGE}"
+echo "Previous: \${PREVIOUS_IMAGE:-none}"
 
-write_image_env "${NEW_IMAGE}"
+write_image_env "\${NEW_IMAGE}"
 
-docker compose --env-file "${IMAGE_ENV}" pull app
-docker compose --env-file "${IMAGE_ENV}" up -d --no-deps app
+docker compose --env-file "\${IMAGE_ENV}" pull app
+docker compose --env-file "\${IMAGE_ENV}" up -d --no-deps app
 
 SUCCESS=false
 
@@ -515,9 +515,9 @@ for attempt in {1..12}; do
           myapp 2>/dev/null || true
     )"
 
-    echo "Health status: ${STATUS}"
+    echo "Health status: \${STATUS}"
 
-    if [[ "${STATUS}" == "healthy" ]]; then
+    if [[ "\${STATUS}" == "healthy" ]]; then
         SUCCESS=true
         break
     fi
@@ -525,7 +525,7 @@ for attempt in {1..12}; do
     sleep 5
 done
 
-if [[ "${SUCCESS}" == "true" ]]; then
+if [[ "\${SUCCESS}" == "true" ]]; then
     echo "Deployment successful."
     docker image prune -f >/dev/null 2>&1 || true
     exit 0
@@ -533,17 +533,17 @@ fi
 
 echo "Deployment failed."
 
-if [[ -z "${PREVIOUS_IMAGE}" ]]; then
+if [[ -z "\${PREVIOUS_IMAGE}" ]]; then
     echo "No previous image is available for rollback."
     exit 1
 fi
 
-echo "Rolling back to: ${PREVIOUS_IMAGE}"
+echo "Rolling back to: \${PREVIOUS_IMAGE}"
 
-write_image_env "${PREVIOUS_IMAGE}"
+write_image_env "\${PREVIOUS_IMAGE}"
 
-docker compose --env-file "${IMAGE_ENV}" pull app
-docker compose --env-file "${IMAGE_ENV}" up -d --no-deps app
+docker compose --env-file "\${IMAGE_ENV}" pull app
+docker compose --env-file "\${IMAGE_ENV}" up -d --no-deps app
 
 sleep 10
 
@@ -553,7 +553,7 @@ ROLLBACK_STATUS="$(
       myapp 2>/dev/null || true
 )"
 
-if [[ "${ROLLBACK_STATUS}" != "healthy" ]]; then
+if [[ "\${ROLLBACK_STATUS}" != "healthy" ]]; then
     echo "CRITICAL: rollback container is not healthy."
     exit 2
 fi
@@ -631,11 +631,11 @@ jobs:
         run: |
           docker build \
             --target builder \
-            --tag app-test:${GITHUB_SHA} \
+            --tag app-test:\${GITHUB_SHA} \
             .
 
       - name: Inspect image
-        run: docker image inspect app-test:${GITHUB_SHA}
+        run: docker image inspect app-test:\${GITHUB_SHA}
 
   publish:
     runs-on: ubuntu-latest
@@ -646,7 +646,7 @@ jobs:
       packages: write
 
     outputs:
-      image_ref: ${{ steps.digest.outputs.image_ref }}
+      image_ref: \${{ steps.digest.outputs.image_ref }}
 
     steps:
       - name: Checkout
@@ -658,15 +658,15 @@ jobs:
         id: image
         shell: bash
         run: |
-          IMAGE="$(echo "${REGISTRY}/${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
-          echo "name=${IMAGE}" >> "${GITHUB_OUTPUT}"
+          IMAGE="$(echo "\${REGISTRY}/\${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
+          echo "name=\${IMAGE}" >> "\${GITHUB_OUTPUT}"
 
       - name: Login to GHCR
         shell: bash
         run: |
-          printf '%s' "${{ secrets.GITHUB_TOKEN }}" \
-            | docker login "${REGISTRY}" \
-                --username "${GITHUB_ACTOR}" \
+          printf '%s' "\${{ secrets.GITHUB_TOKEN }}" \
+            | docker login "\${REGISTRY}" \
+                --username "\${GITHUB_ACTOR}" \
                 --password-stdin
 
       - name: Build production image
@@ -674,31 +674,31 @@ jobs:
         run: |
           docker build \
             --pull \
-            --tag "${{ steps.image.outputs.name }}:${GITHUB_SHA}" \
+            --tag "\${{ steps.image.outputs.name }}:\${GITHUB_SHA}" \
             .
 
       - name: Push production image
         shell: bash
         run: |
-          docker push "${{ steps.image.outputs.name }}:${GITHUB_SHA}"
+          docker push "\${{ steps.image.outputs.name }}:\${GITHUB_SHA}"
 
       - name: Resolve immutable digest
         id: digest
         shell: bash
         run: |
-          docker pull "${{ steps.image.outputs.name }}:${GITHUB_SHA}"
+          docker pull "\${{ steps.image.outputs.name }}:\${GITHUB_SHA}"
 
           IMAGE_REF="$(
             docker inspect \
               --format='{{index .RepoDigests 0}}' \
-              "${{ steps.image.outputs.name }}:${GITHUB_SHA}"
+              "\${{ steps.image.outputs.name }}:\${GITHUB_SHA}"
           )"
 
-          echo "image_ref=${IMAGE_REF}" >> "${GITHUB_OUTPUT}"
+          echo "image_ref=\${IMAGE_REF}" >> "\${GITHUB_OUTPUT}"
 
       - name: Logout
         if: always()
-        run: docker logout "${REGISTRY}" || true
+        run: docker logout "\${REGISTRY}" || true
 
   deploy:
     runs-on: ubuntu-latest
@@ -715,36 +715,36 @@ jobs:
       - name: Configure SSH
         shell: bash
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.PROD_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: \${{ secrets.PROD_SSH_KEY }}
+          SSH_KNOWN_HOSTS: \${{ secrets.PROD_KNOWN_HOSTS }}
         run: |
           install -m 700 -d ~/.ssh
 
-          printf '%s\n' "${SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
+          printf '%s\n' "\${SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-          printf '%s\n' "${SSH_KNOWN_HOSTS}" > ~/.ssh/known_hosts
+          printf '%s\n' "\${SSH_KNOWN_HOSTS}" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
       - name: Deploy immutable image
         shell: bash
         env:
-          PROD_HOST: ${{ secrets.PROD_HOST }}
-          PROD_PORT: ${{ secrets.PROD_PORT }}
-          PROD_USER: ${{ secrets.PROD_USER }}
-          IMAGE_REF: ${{ needs.publish.outputs.image_ref }}
-          GHCR_USER: ${{ github.actor }}
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROD_HOST: \${{ secrets.PROD_HOST }}
+          PROD_PORT: \${{ secrets.PROD_PORT }}
+          PROD_USER: \${{ secrets.PROD_USER }}
+          IMAGE_REF: \${{ needs.publish.outputs.image_ref }}
+          GHCR_USER: \${{ github.actor }}
+          GHCR_TOKEN: \${{ secrets.GITHUB_TOKEN }}
         run: |
-          printf '%s\n%s\n' "${GHCR_USER}" "${GHCR_TOKEN}" \
+          printf '%s\n%s\n' "\${GHCR_USER}" "\${GHCR_TOKEN}" \
             | ssh \
                 -i ~/.ssh/id_ed25519 \
-                -p "${PROD_PORT}" \
+                -p "\${PROD_PORT}" \
                 -o BatchMode=yes \
                 -o IdentitiesOnly=yes \
                 -o StrictHostKeyChecking=yes \
-                "${PROD_USER}@${PROD_HOST}" \
-                "deploy ${IMAGE_REF}"
+                "\${PROD_USER}@\${PROD_HOST}" \
+                "deploy \${IMAGE_REF}"
 
       - name: Remove SSH key
         if: always()
