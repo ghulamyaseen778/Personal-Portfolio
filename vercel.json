@@ -1,4 +1,31 @@
 {
+  "redirects": [
+    {
+      "source": "/blog/mongodb-backup",
+      "destination": "/blog/mongodb-automated-backup-recovery",
+      "permanent": true
+    },
+    {
+      "source": "/blog/mongodb-backup-recovery",
+      "destination": "/blog/mongodb-automated-backup-recovery",
+      "permanent": true
+    },
+    {
+      "source": "/blog/mongodb-backup-and-restore",
+      "destination": "/blog/mongodb-automated-backup-recovery",
+      "permanent": true
+    },
+    {
+      "source": "/blog/mongodb-restore-deleted-data",
+      "destination": "/blog/mongodb-automated-backup-recovery",
+      "permanent": true
+    },
+    {
+      "source": "/blog/mongodump-mongorestore",
+      "destination": "/blog/mongodb-automated-backup-recovery",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
