@@ -1,6 +1,6 @@
 export const SITE_URL = (
   import.meta.env.VITE_SITE_URL ||
-  "https://personal-portfolio-omega-swart-29.vercel.app"
+  "https://ghulamyaseen.site"
 ).replace(/\/+$/, "");
 
 export const SITE_NAME = "Muhammad Ghulam Yaseen";
