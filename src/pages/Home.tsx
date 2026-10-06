@@ -163,6 +163,14 @@ const aiSystems = [
 
 const articles = [
   {
+    category: "Database",
+    readTime: "20 min read",
+    title: "MongoDB Automated Backups & Safe Recovery",
+    description:
+      "Run compressed MongoDB backups every 15 minutes, keep seven days of retention and recover accidentally deleted data safely from a separate backup server.",
+    href: "/blog/mongodb-automated-backup-recovery"
+  },
+  {
     category: "DevOps",
     readTime: "22 min read",
     title: "Production CI/CD with GitHub Actions & VPS",
