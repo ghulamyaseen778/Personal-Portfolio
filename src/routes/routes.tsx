@@ -3,6 +3,7 @@ import Home from "../pages/Home";
 import BlogPage from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetails";
 import ProjectDetails from "../pages/ProjectDetails";
+import NotFound from "../pages/NotFound";
 
 const mongodbBackupCanonical = "/blog/mongodb-automated-backup-recovery";
 
@@ -19,5 +20,5 @@ export const router = createBrowserRouter([
   { path: "/blog/mongodump-mongorestore", element: <Navigate to={mongodbBackupCanonical} replace /> },
 
   { path: "/blog/:slug", element: <BlogDetail /> },
-  { path: "*", element: <Navigate to="/" replace /> }
+  { path: "*", element: <NotFound /> }
 ]);
