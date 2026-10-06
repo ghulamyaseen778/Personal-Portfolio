@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { FiArrowLeft, FiArrowUpRight } from "react-icons/fi";
 import { blogs } from "../blog";
 import { categories } from "../blog/types";
+import { absoluteUrl, SITE_NAME } from "../config/site";
 import styles from "../components/Blog/Blog.module.css";
 
 export default function BlogPage() {
@@ -17,11 +18,40 @@ export default function BlogPage() {
   return (
     <>
       <Helmet>
-        <title>Articles & Engineering Notes | Muhammad Ghulam Yaseen</title>
+        <html lang="en" />
+        <title>Software Engineering Articles, MongoDB, DevOps & React | {SITE_NAME}</title>
         <meta
           name="description"
-          content="Practical articles about VPS deployment, MongoDB, React, backend systems, mobile development and production engineering."
+          content="Practical software engineering articles covering MongoDB backup and recovery, VPS deployment, Nginx load balancing, IPsec, CI/CD, React and production systems."
         />
+        <meta
+          name="keywords"
+          content="MongoDB backup recovery, mongodump mongorestore, MongoDB restore deleted data, VPS deployment, Nginx load balancer, IPsec VPN, GitHub Actions CI/CD, React engineering"
+        />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+        <link rel="canonical" href={absoluteUrl("/blog")} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`Software Engineering Articles | ${SITE_NAME}`} />
+        <meta
+          property="og:description"
+          content="Production-focused engineering guides for MongoDB, DevOps, networking, backend systems and React."
+        />
+        <meta property="og:url" content={absoluteUrl("/blog")} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: "Software Engineering Articles",
+            url: absoluteUrl("/blog"),
+            description:
+              "Production-focused software engineering guides covering MongoDB, DevOps, networking, backend systems and React.",
+            isPartOf: {
+              "@type": "WebSite",
+              name: SITE_NAME,
+              url: absoluteUrl("/")
+            }
+          })}
+        </script>
       </Helmet>
 
       <main className={styles.page}>
