@@ -7,7 +7,7 @@ const mongodbBackupRecovery: BlogPost = {
   description:
     "A production-focused guide to running compressed MongoDB backups on a separate Ubuntu server every 15 minutes, automatically deleting backups older than seven days, verifying archives and safely recovering accidentally deleted data.",
   category: "Database",
-  readTime: "18 min read",
+  readTime: "20 min read",
   date: "October 2026",
   tags: ["MongoDB", "Backup", "Recovery", "Ubuntu", "mongodump", "mongorestore", "Cron"],
   featured: true,
@@ -180,7 +180,63 @@ const mongodbBackupRecovery: BlogPost = {
         <li>Inspect and copy only the missing data back whenever possible.</li>
       </ol>
 
-      <h2>15. Preserve the current state before recovery</h2>
+      <h2>15. Recover directly from the OTHER backup server</h2>
+      <p>
+        In this setup the dump files live on a separate backup server, not on the MongoDB
+        server. You do not have to copy the dump to the database machine first. Run
+        <code>mongorestore</code> on the backup server and point it to the MongoDB server
+        over its private/IPsec database address.
+      </p>
+      <CodeBlock
+        language="text"
+        code={"BACKUP SERVER\n/srv/mongodb-backups/domicileprc-20261006_181500.archive.gz\n        |\n        | mongorestore over private network / IPsec\n        v\nMONGODB SERVER\nDB_PRIVATE_IP:27017\n        |\n        v\ndomicileprc_recovery"}
+      />
+      <p>On the backup server, first find the last backup created before the deletion:</p>
+      <CodeBlock
+        language="bash"
+        code={"ls -lht /srv/mongodb-backups/*.archive.gz | head -n 30"}
+      />
+      <p>
+        Example: if data was accidentally deleted at 18:22, choose the 18:15 archive, not
+        the 18:30 archive.
+      </p>
+      <p>Verify that archive before restoring it:</p>
+      <CodeBlock
+        language="bash"
+        code={'cd /srv/mongodb-backups\nsha256sum -c domicileprc-20261006_181500.archive.gz.sha256'}
+      />
+      <p>
+        Now, still on the backup server, restore the old production database into a temporary
+        database called <code>domicileprc_recovery</code> on the real MongoDB server:
+      </p>
+      <CodeBlock
+        language="bash"
+        code={'BACKUP="/srv/mongodb-backups/domicileprc-20261006_181500.archive.gz"\n\nmongorestore \\\n  --host=DB_PRIVATE_IP \\\n  --port=27017 \\\n  --username=mongoRestore \\\n  --authenticationDatabase=admin \\\n  --archive="$BACKUP" \\\n  --gzip \\\n  --nsFrom="domicileprc.*" \\\n  --nsTo="domicileprc_recovery.*" \\\n  --password'}
+      />
+      <p>
+        The command above reads the <code>.archive.gz</code> file from the backup server and
+        sends the restored documents to MongoDB over the private connection. Production
+        <code>domicileprc</code> remains untouched because the restored namespace is renamed
+        to <code>domicileprc_recovery</code>.
+      </p>
+      <blockquote>
+        Do not start with <code>--drop</code>. First restore into a temporary recovery
+        database, verify the missing records, and then move only the required data back to
+        production whenever possible.
+      </blockquote>
+
+      <h2>26. If the backup server cannot reach MongoDB directly</h2>
+      <p>
+        If firewall or routing rules do not allow the backup server to connect to MongoDB,
+        securely copy only the selected archive to a trusted recovery host or the MongoDB
+        server through SSH, then restore it locally.
+      </p>
+      <CodeBlock
+        language="bash"
+        code={'# Run from the backup server\nscp /srv/mongodb-backups/domicileprc-20261006_181500.archive.gz \\\n  recoveryuser@MONGODB_SERVER_PRIVATE_IP:/tmp/\n\n# Then on the MongoDB/recovery server\nmongorestore \\\n  --host=127.0.0.1 \\\n  --port=27017 \\\n  --username=mongoRestore \\\n  --authenticationDatabase=admin \\\n  --archive=/tmp/domicileprc-20261006_181500.archive.gz \\\n  --gzip \\\n  --nsFrom="domicileprc.*" \\\n  --nsTo="domicileprc_recovery.*" \\\n  --password'}
+      />
+
+      <h2>27. Preserve the current state before recovery</h2>
       <p>
         The current database may contain valid writes created after the older backup. Preserve
         those writes before doing anything destructive.
