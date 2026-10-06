@@ -29,7 +29,7 @@ const mongodbBackupRecovery: BlogPost = {
       <h2>1. Architecture</h2>
       <CodeBlock
         language="text"
-        code={"Application Servers\n        |\n        v\nMongoDB Server\n  private network / IPsec\n        |\n        | TCP 27017\n        v\nBackup Server\n  /srv/mongodb-backups\n  ├── domicileprc_20261006_180000.archive.gz\n  ├── domicileprc_20261006_181500.archive.gz\n  ├── domicileprc_20261006_183000.archive.gz\n  └── ...\n\nCron runs every 15 minutes\nRetention: 7 days"}
+        code={"Record Servers\n        |\n        v\nMongoDB Server\n  private network / IPsec\n        |\n        | TCP 27017\n        v\nBackup Server\n  /srv/mongodb-backups\n  ├── appdb_20261006_180000.archive.gz\n  ├── appdb_20261006_181500.archive.gz\n  ├── appdb_20261006_183000.archive.gz\n  └── ...\n\nCron runs every 15 minutes\nRetention: 7 days"}
       />
       <p>
         The backup server should reach MongoDB only through a trusted private network or VPN.
@@ -61,7 +61,7 @@ const mongodbBackupRecovery: BlogPost = {
 
       <h2>4. Create a dedicated backup user</h2>
       <p>
-        Do not use the application account or a cluster administrator inside the backup
+        Do not use the record account or a cluster administrator inside the backup
         script. On the MongoDB server, authenticate with an administrator that can manage
         users and create a backup-only account:
       </p>
@@ -84,7 +84,7 @@ const mongodbBackupRecovery: BlogPost = {
         code={'use admin\n\ndb.createUser({\n  user: "mongoRestore",\n  pwd: passwordPrompt(),\n  roles: [\n    { role: "restore", db: "admin" }\n  ]\n})'}
       />
       <p>
-        Use this account manually during recovery. Application servers should continue using
+        Use this account manually during recovery. Record servers should continue using
         their normal least-privilege database user.
       </p>
 
@@ -96,13 +96,12 @@ const mongodbBackupRecovery: BlogPost = {
 
       <h2>7. Store the connection separately from the script</h2>
       <p>
-        Create a root-only environment file. Replace the host with the private MongoDB IP
-        reachable from the backup server. URL-encode special characters in the password.
+        Create a root-only environment file. Use an example hostname below and replace it with the database hostname reachable from your backup server. URL-encode special characters in the password.
       </p>
       <CodeBlock language="bash" code={"sudo nano /etc/mongodb-backup.env"} />
       <CodeBlock
         language="env"
-        code={"MONGO_BACKUP_URI='mongodb://mongoBackup:URL_ENCODED_PASSWORD@DB_PRIVATE_IP:27017/?authSource=admin'"}
+        code={"MONGO_BACKUP_URI='mongodb://mongoBackup:URL_ENCODED_PASSWORD@db.internal.example:27017/?authSource=admin'"}
       />
       <CodeBlock
         language="bash"
@@ -112,7 +111,7 @@ const mongodbBackupRecovery: BlogPost = {
       <h2>8. Test one compressed backup manually</h2>
       <CodeBlock
         language="bash"
-        code={'sudo bash -c \'\nset -a\nsource /etc/mongodb-backup.env\nset +a\n\nmongodump \\\n  --uri="$MONGO_BACKUP_URI" \\\n  --db=domicileprc \\\n  --archive=/srv/mongodb-backups/manual-test.archive.gz \\\n  --gzip\n\''}
+        code={'sudo bash -c \'\nset -a\nsource /etc/mongodb-backup.env\nset +a\n\nmongodump \\\n  --uri="$MONGO_BACKUP_URI" \\\n  --db=appdb \\\n  --archive=/srv/mongodb-backups/manual-test.archive.gz \\\n  --gzip\n\''}
       />
       <CodeBlock
         language="bash"
@@ -127,7 +126,7 @@ const mongodbBackupRecovery: BlogPost = {
       <CodeBlock language="bash" code={"sudo nano /usr/local/sbin/mongodb-backup.sh"} />
       <CodeBlock
         language="bash"
-        code={'#!/usr/bin/env bash\nset -Eeuo pipefail\numask 077\n\nDB_NAME="domicileprc"\nBACKUP_DIR="/srv/mongodb-backups"\nENV_FILE="/etc/mongodb-backup.env"\nLOG_FILE="/var/log/mongodb-backup.log"\nLOCK_FILE="/var/lock/mongodb-backup.lock"\nRETENTION_MINUTES=10080\nMONGODUMP_BIN="/usr/bin/mongodump"\n\nmkdir -p "$BACKUP_DIR"\n\nexec 9>"$LOCK_FILE"\nif ! flock -n 9; then\n  echo "$(date -Is) backup skipped: previous job is still running" >> "$LOG_FILE"\n  exit 0\nfi\n\nif [[ ! -r "$ENV_FILE" ]]; then\n  echo "$(date -Is) ERROR: cannot read $ENV_FILE" >> "$LOG_FILE"\n  exit 1\nfi\n\nset -a\nsource "$ENV_FILE"\nset +a\n\nif [[ -z "$MONGO_BACKUP_URI" ]]; then\n  echo "$(date -Is) ERROR: MONGO_BACKUP_URI is empty" >> "$LOG_FILE"\n  exit 1\nfi\n\nSTAMP="$(date +%Y%m%d_%H%M%S)"\nFINAL="$BACKUP_DIR/$DB_NAME-$STAMP.archive.gz"\nTEMP="$FINAL.partial"\nCHECKSUM="$FINAL.sha256"\n\ncleanup() {\n  rm -f "$TEMP"\n}\ntrap cleanup EXIT\n\necho "$(date -Is) backup started: $FINAL" >> "$LOG_FILE"\n\nif "$MONGODUMP_BIN" \\\n  --uri="$MONGO_BACKUP_URI" \\\n  --db="$DB_NAME" \\\n  --archive="$TEMP" \\\n  --gzip >> "$LOG_FILE" 2>&1\nthen\n  mv "$TEMP" "$FINAL"\n  sha256sum "$FINAL" > "$CHECKSUM"\n\n  find "$BACKUP_DIR" -type f \\\n    \\( -name "*.archive.gz" -o -name "*.archive.gz.sha256" \\) \\\n    -mmin +$RETENTION_MINUTES \\\n    -delete\n\n  SIZE="$(du -h "$FINAL" | awk \'{print $1}\')"\n  echo "$(date -Is) backup completed: $FINAL ($SIZE)" >> "$LOG_FILE"\nelse\n  echo "$(date -Is) ERROR: mongodump failed" >> "$LOG_FILE"\n  exit 1\nfi\n\ntrap - EXIT'}
+        code={'#!/usr/bin/env bash\nset -Eeuo pipefail\numask 077\n\nDB_NAME="appdb"\nBACKUP_DIR="/srv/mongodb-backups"\nENV_FILE="/etc/mongodb-backup.env"\nLOG_FILE="/var/log/mongodb-backup.log"\nLOCK_FILE="/var/lock/mongodb-backup.lock"\nRETENTION_MINUTES=10080\nMONGODUMP_BIN="/usr/bin/mongodump"\n\nmkdir -p "$BACKUP_DIR"\n\nexec 9>"$LOCK_FILE"\nif ! flock -n 9; then\n  echo "$(date -Is) backup skipped: previous job is still running" >> "$LOG_FILE"\n  exit 0\nfi\n\nif [[ ! -r "$ENV_FILE" ]]; then\n  echo "$(date -Is) ERROR: cannot read $ENV_FILE" >> "$LOG_FILE"\n  exit 1\nfi\n\nset -a\nsource "$ENV_FILE"\nset +a\n\nif [[ -z "$MONGO_BACKUP_URI" ]]; then\n  echo "$(date -Is) ERROR: MONGO_BACKUP_URI is empty" >> "$LOG_FILE"\n  exit 1\nfi\n\nSTAMP="$(date +%Y%m%d_%H%M%S)"\nFINAL="$BACKUP_DIR/$DB_NAME-$STAMP.archive.gz"\nTEMP="$FINAL.partial"\nCHECKSUM="$FINAL.sha256"\n\ncleanup() {\n  rm -f "$TEMP"\n}\ntrap cleanup EXIT\n\necho "$(date -Is) backup started: $FINAL" >> "$LOG_FILE"\n\nif "$MONGODUMP_BIN" \\\n  --uri="$MONGO_BACKUP_URI" \\\n  --db="$DB_NAME" \\\n  --archive="$TEMP" \\\n  --gzip >> "$LOG_FILE" 2>&1\nthen\n  mv "$TEMP" "$FINAL"\n  sha256sum "$FINAL" > "$CHECKSUM"\n\n  find "$BACKUP_DIR" -type f \\\n    \\( -name "*.archive.gz" -o -name "*.archive.gz.sha256" \\) \\\n    -mmin +$RETENTION_MINUTES \\\n    -delete\n\n  SIZE="$(du -h "$FINAL" | awk \'{print $1}\')"\n  echo "$(date -Is) backup completed: $FINAL ($SIZE)" >> "$LOG_FILE"\nelse\n  echo "$(date -Is) ERROR: mongodump failed" >> "$LOG_FILE"\n  exit 1\nfi\n\ntrap - EXIT'}
       />
 
       <h2>10. Why this script is safer</h2>
@@ -158,7 +157,7 @@ const mongodbBackupRecovery: BlogPost = {
       <h2>13. Verify a backup before trusting it</h2>
       <CodeBlock
         language="bash"
-        code={"cd /srv/mongodb-backups\nsha256sum -c domicileprc-20261006_181500.archive.gz.sha256"}
+        code={"cd /srv/mongodb-backups\nsha256sum -c appdb-20261006_181500.archive.gz.sha256"}
       />
       <p>
         A checksum verifies the file itself, but a real backup test also requires restoring
@@ -168,10 +167,10 @@ const mongodbBackupRecovery: BlogPost = {
       <h2>14. Accidentally deleted data: what to do first</h2>
       <p>
         If someone runs an incorrect <code>deleteMany()</code>, update, migration or
-        application action, do not immediately restore the entire production database.
+        record action, do not immediately restore the entire production database.
       </p>
       <ol>
-        <li>Stop or restrict the application path that is continuing to damage the data.</li>
+        <li>Stop or restrict the record path that is continuing to damage the data.</li>
         <li>Record the approximate deletion time.</li>
         <li>Do not delete the current production database.</li>
         <li>Create an emergency backup of the current state.</li>
@@ -184,12 +183,11 @@ const mongodbBackupRecovery: BlogPost = {
       <p>
         In this setup the dump files live on a separate backup server, not on the MongoDB
         server. You do not have to copy the dump to the database machine first. Run
-        <code>mongorestore</code> on the backup server and point it to the MongoDB server
-        over its private/IPsec database address.
+        <code>mongorestore</code> on the backup server and point it to the MongoDB server over the protected network connection.
       </p>
       <CodeBlock
         language="text"
-        code={"BACKUP SERVER\n/srv/mongodb-backups/domicileprc-20261006_181500.archive.gz\n        |\n        | mongorestore over private network / IPsec\n        v\nMONGODB SERVER\nDB_PRIVATE_IP:27017\n        |\n        v\ndomicileprc_recovery"}
+        code={"BACKUP SERVER\n/srv/mongodb-backups/appdb-20261006_181500.archive.gz\n        |\n        | mongorestore over private network / IPsec\n        v\nMONGODB SERVER\ndb.internal.example:27017\n        |\n        v\nappdb_recovery"}
       />
       <p>On the backup server, first find the last backup created before the deletion:</p>
       <CodeBlock
@@ -203,21 +201,21 @@ const mongodbBackupRecovery: BlogPost = {
       <p>Verify that archive before restoring it:</p>
       <CodeBlock
         language="bash"
-        code={'cd /srv/mongodb-backups\nsha256sum -c domicileprc-20261006_181500.archive.gz.sha256'}
+        code={'cd /srv/mongodb-backups\nsha256sum -c appdb-20261006_181500.archive.gz.sha256'}
       />
       <p>
         Now, still on the backup server, restore the old production database into a temporary
-        database called <code>domicileprc_recovery</code> on the real MongoDB server:
+        database called <code>appdb_recovery</code> on the real MongoDB server:
       </p>
       <CodeBlock
         language="bash"
-        code={'BACKUP="/srv/mongodb-backups/domicileprc-20261006_181500.archive.gz"\n\nmongorestore \\\n  --host=DB_PRIVATE_IP \\\n  --port=27017 \\\n  --username=mongoRestore \\\n  --authenticationDatabase=admin \\\n  --archive="$BACKUP" \\\n  --gzip \\\n  --nsFrom="domicileprc.*" \\\n  --nsTo="domicileprc_recovery.*" \\\n  --password'}
+        code={'BACKUP="/srv/mongodb-backups/appdb-20261006_181500.archive.gz"\n\nmongorestore \\\n  --host=db.internal.example \\\n  --port=27017 \\\n  --username=mongoRestore \\\n  --authenticationDatabase=admin \\\n  --archive="$BACKUP" \\\n  --gzip \\\n  --nsFrom="appdb.*" \\\n  --nsTo="appdb_recovery.*" \\\n  --password'}
       />
       <p>
         The command above reads the <code>.archive.gz</code> file from the backup server and
         sends the restored documents to MongoDB over the private connection. Production
-        <code>domicileprc</code> remains untouched because the restored namespace is renamed
-        to <code>domicileprc_recovery</code>.
+        <code>appdb</code> remains untouched because the restored namespace is renamed
+        to <code>appdb_recovery</code>.
       </p>
       <blockquote>
         Do not start with <code>--drop</code>. First restore into a temporary recovery
@@ -225,7 +223,7 @@ const mongodbBackupRecovery: BlogPost = {
         production whenever possible.
       </blockquote>
 
-      <h2>26. If the backup server cannot reach MongoDB directly</h2>
+      <h2>16. If the backup server cannot reach MongoDB directly</h2>
       <p>
         If firewall or routing rules do not allow the backup server to connect to MongoDB,
         securely copy only the selected archive to a trusted recovery host or the MongoDB
@@ -233,20 +231,20 @@ const mongodbBackupRecovery: BlogPost = {
       </p>
       <CodeBlock
         language="bash"
-        code={'# Run from the backup server\nscp /srv/mongodb-backups/domicileprc-20261006_181500.archive.gz \\\n  recoveryuser@MONGODB_SERVER_PRIVATE_IP:/tmp/\n\n# Then on the MongoDB/recovery server\nmongorestore \\\n  --host=127.0.0.1 \\\n  --port=27017 \\\n  --username=mongoRestore \\\n  --authenticationDatabase=admin \\\n  --archive=/tmp/domicileprc-20261006_181500.archive.gz \\\n  --gzip \\\n  --nsFrom="domicileprc.*" \\\n  --nsTo="domicileprc_recovery.*" \\\n  --password'}
+        code={'# Run from the backup server\nscp /srv/mongodb-backups/appdb-20261006_181500.archive.gz \\\n  recoveryuser@db.internal.example:/tmp/\n\n# Then on the MongoDB/recovery server\nmongorestore \\\n  --host=127.0.0.1 \\\n  --port=27017 \\\n  --username=mongoRestore \\\n  --authenticationDatabase=admin \\\n  --archive=/tmp/appdb-20261006_181500.archive.gz \\\n  --gzip \\\n  --nsFrom="appdb.*" \\\n  --nsTo="appdb_recovery.*" \\\n  --password'}
       />
 
-      <h2>27. Preserve the current state before recovery</h2>
+      <h2>17. Preserve the current state before recovery</h2>
       <p>
         The current database may contain valid writes created after the older backup. Preserve
         those writes before doing anything destructive.
       </p>
       <CodeBlock
         language="bash"
-        code={'mongodump \\\n  --uri="mongodb://mongoBackup@DB_PRIVATE_IP:27017/?authSource=admin" \\\n  --db=domicileprc \\\n  --archive=/srv/mongodb-backups/PRE_RECOVERY_$(date +%Y%m%d_%H%M%S).archive.gz \\\n  --gzip'}
+        code={'mongodump \\\n  --uri="mongodb://mongoBackup@db.internal.example:27017/?authSource=admin" \\\n  --db=appdb \\\n  --archive=/srv/mongodb-backups/PRE_RECOVERY_$(date +%Y%m%d_%H%M%S).archive.gz \\\n  --gzip'}
       />
 
-      <h2>16. Select the last good backup</h2>
+      <h2>18. Select the last good backup</h2>
       <CodeBlock
         language="bash"
         code={"ls -lht /srv/mongodb-backups/*.archive.gz | head -n 20"}
@@ -256,49 +254,49 @@ const mongodbBackupRecovery: BlogPost = {
         Do not automatically choose 18:30 because it may already contain the deletion.
       </p>
 
-      <h2>17. Restore safely into a temporary database</h2>
+      <h2>19. Restore safely into a temporary database</h2>
       <p>
-        Do not overwrite production first. Restore <code>domicileprc</code> as
-        <code>domicileprc_recovery</code>:
+        Do not overwrite production first. Restore <code>appdb</code> as
+        <code>appdb_recovery</code>:
       </p>
       <CodeBlock
         language="bash"
-        code={'BACKUP="/srv/mongodb-backups/domicileprc-20261006_181500.archive.gz"\n\nmongorestore \\\n  --host=DB_PRIVATE_IP \\\n  --port=27017 \\\n  --username=mongoRestore \\\n  --authenticationDatabase=admin \\\n  --archive="$BACKUP" \\\n  --gzip \\\n  --nsFrom="domicileprc.*" \\\n  --nsTo="domicileprc_recovery.*"'}
+        code={'BACKUP="/srv/mongodb-backups/appdb-20261006_181500.archive.gz"\n\nmongorestore \\\n  --host=db.internal.example \\\n  --port=27017 \\\n  --username=mongoRestore \\\n  --authenticationDatabase=admin \\\n  --archive="$BACKUP" \\\n  --gzip \\\n  --nsFrom="appdb.*" \\\n  --nsTo="appdb_recovery.*"'}
       />
       <p>
         With the password omitted, the restore command can prompt for it interactively instead
         of storing the restore password in a script.
       </p>
 
-      <h2>18. Inspect the recovered data</h2>
+      <h2>20. Inspect the recovered data</h2>
       <p>Use an authorized account that can read the recovery database:</p>
       <CodeBlock
         language="javascript"
-        code={'use domicileprc_recovery\n\nshow collections\n\ndb.applications.countDocuments()\ndb.applications.findOne({ _id: ObjectId("REPLACE_WITH_ID") })'}
+        code={'use appdb_recovery\n\nshow collections\n\ndb.records.countDocuments()\ndb.records.findOne({ _id: ObjectId("REPLACE_WITH_ID") })'}
       />
 
-      <h2>19. Copy only the missing document when possible</h2>
+      <h2>21. Copy only the missing document when possible</h2>
       <p>
         If only a small number of documents were deleted, move them from the recovery database
         into the current production database instead of rolling everything backward.
       </p>
       <CodeBlock
         language="javascript"
-        code={'const recovery = db.getSiblingDB("domicileprc_recovery");\nconst production = db.getSiblingDB("domicileprc");\n\nconst doc = recovery.applications.findOne({\n  _id: ObjectId("REPLACE_WITH_ID")\n});\n\nif (doc && !production.applications.findOne({ _id: doc._id })) {\n  production.applications.insertOne(doc);\n}'}
+        code={'const recovery = db.getSiblingDB("appdb_recovery");\nconst production = db.getSiblingDB("appdb");\n\nconst doc = recovery.records.findOne({\n  _id: ObjectId("REPLACE_WITH_ID")\n});\n\nif (doc && !production.records.findOne({ _id: doc._id })) {\n  production.records.insertOne(doc);\n}'}
       />
       <p>
-        Check related collections as well. An application may have linked payments,
-        certificates, history, audit logs or other records that also need recovery.
+        Check related collections as well. An record may have linked related records,
+        related records, history, audit logs or other records that also need recovery.
       </p>
 
-      <h2>20. Full database rollback is the destructive option</h2>
+      <h2>22. Full database rollback is the destructive option</h2>
       <p>
         Use this only when you intentionally want production to match the selected backup.
-        Stop application writes first and create the emergency pre-recovery dump.
+        Stop record writes first and create the emergency pre-recovery dump.
       </p>
       <CodeBlock
         language="bash"
-        code={'mongorestore \\\n  --host=DB_PRIVATE_IP \\\n  --port=27017 \\\n  --username=mongoRestore \\\n  --authenticationDatabase=admin \\\n  --archive="/srv/mongodb-backups/domicileprc-20261006_181500.archive.gz" \\\n  --gzip \\\n  --drop'}
+        code={'mongorestore \\\n  --host=db.internal.example \\\n  --port=27017 \\\n  --username=mongoRestore \\\n  --authenticationDatabase=admin \\\n  --archive="/srv/mongodb-backups/appdb-20261006_181500.archive.gz" \\\n  --gzip \\\n  --drop'}
       />
       <blockquote>
         <code>--drop</code> is destructive. It drops collections that are present in the
@@ -306,16 +304,16 @@ const mongodbBackupRecovery: BlogPost = {
         database.
       </blockquote>
 
-      <h2>21. Clean up the temporary recovery database</h2>
+      <h2>23. Clean up the temporary recovery database</h2>
       <p>Only after production has been validated:</p>
       <CodeBlock
         language="javascript"
-        code={"use domicileprc_recovery\ndb.dropDatabase()"}
+        code={"use appdb_recovery\ndb.dropDatabase()"}
       />
 
-      <h2>22. Consistency note for a busy replica set</h2>
+      <h2>24. Consistency note for a busy replica set</h2>
       <p>
-        A database-specific <code>mongodump --db=domicileprc</code> can run while production
+        A database-specific <code>mongodump --db=appdb</code> can run while production
         is accepting writes, but a busy database can change while the dump is being created.
         For strict consistency on a replica set, MongoDB supports a full dump with
         <code>--oplog</code> and a matching restore with <code>--oplogReplay</code>.
@@ -327,17 +325,17 @@ const mongodbBackupRecovery: BlogPost = {
         on full 15-minute database dumps.
       </p>
 
-      <h2>23. Monitor storage and backup health</h2>
+      <h2>25. Monitor storage and backup health</h2>
       <CodeBlock
         language="bash"
         code={"df -h /srv/mongodb-backups\ndu -sh /srv/mongodb-backups\ndu -h /srv/mongodb-backups/*.archive.gz | sort -h | tail\n\nsudo tail -f /var/log/mongodb-backup.log"}
       />
 
-      <h2>24. Production checklist</h2>
+      <h2>26. Production checklist</h2>
       <ul>
         <li>Keep the backup server separate from the MongoDB server.</li>
         <li>Use a private network, IPsec or another trusted path to MongoDB.</li>
-        <li>Use a dedicated backup account instead of application or cluster-admin credentials.</li>
+        <li>Use a dedicated backup account instead of record or cluster-admin credentials.</li>
         <li>Keep restore credentials separate from automated backup credentials.</li>
         <li>Use compressed archive files rather than permanently storing extracted dumps.</li>
         <li>Prevent overlapping jobs with a lock.</li>
@@ -347,7 +345,7 @@ const mongodbBackupRecovery: BlogPost = {
         <li>During an incident, preserve the current state before restoring old data.</li>
       </ul>
 
-      <h2>25. Final recovery rule</h2>
+      <h2>27. Final recovery rule</h2>
       <p>
         If data is accidentally deleted, the safest default is:
         <strong> stop the damaging operation, preserve the current state, restore the last
