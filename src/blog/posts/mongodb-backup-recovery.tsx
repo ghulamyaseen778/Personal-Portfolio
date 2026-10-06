@@ -3,13 +3,13 @@ import CodeBlock from "../components/CodeBlock";
 
 const mongodbBackupRecovery: BlogPost = {
   slug: "mongodb-automated-backup-recovery",
-  title: "MongoDB Automated Backups: 15-Minute Dumps, 7-Day Retention & Safe Recovery",
+  title: "MongoDB Backup and Restore Guide: Automated mongodump, 7-Day Retention & Deleted Data Recovery",
   description:
-    "A production-focused guide to running compressed MongoDB backups on a separate Ubuntu server every 15 minutes, automatically deleting backups older than seven days, verifying archives and safely recovering accidentally deleted data.",
+    "Learn how to automate compressed MongoDB backups with mongodump every 15 minutes, keep seven days of retention, verify archives, restore with mongorestore and recover accidentally deleted data safely from a separate backup server.",
   category: "Database",
   readTime: "20 min read",
   date: "October 2026",
-  tags: ["MongoDB", "Backup", "Recovery", "Ubuntu", "mongodump", "mongorestore", "Cron"],
+  tags: ["MongoDB", "MongoDB Backup", "MongoDB Restore", "Deleted Data Recovery", "mongodump", "mongorestore", "Ubuntu", "Cron"],
   featured: true,
   content: (
     <>
@@ -29,7 +29,7 @@ const mongodbBackupRecovery: BlogPost = {
       <h2>1. Architecture</h2>
       <CodeBlock
         language="text"
-        code={"Record Servers\n        |\n        v\nMongoDB Server\n  private network / IPsec\n        |\n        | TCP 27017\n        v\nBackup Server\n  /srv/mongodb-backups\n  ├── appdb_20261006_180000.archive.gz\n  ├── appdb_20261006_181500.archive.gz\n  ├── appdb_20261006_183000.archive.gz\n  └── ...\n\nCron runs every 15 minutes\nRetention: 7 days"}
+        code={"Application Servers\n        |\n        v\nMongoDB Server\n  private network / IPsec\n        |\n        | TCP 27017\n        v\nBackup Server\n  /srv/mongodb-backups\n  ├── appdb_20261006_180000.archive.gz\n  ├── appdb_20261006_181500.archive.gz\n  ├── appdb_20261006_183000.archive.gz\n  └── ...\n\nCron runs every 15 minutes\nRetention: 7 days"}
       />
       <p>
         The backup server should reach MongoDB only through a trusted private network or VPN.
@@ -61,7 +61,7 @@ const mongodbBackupRecovery: BlogPost = {
 
       <h2>4. Create a dedicated backup user</h2>
       <p>
-        Do not use the record account or a cluster administrator inside the backup
+        Do not use the application account or a cluster administrator inside the backup
         script. On the MongoDB server, authenticate with an administrator that can manage
         users and create a backup-only account:
       </p>
@@ -84,7 +84,7 @@ const mongodbBackupRecovery: BlogPost = {
         code={'use admin\n\ndb.createUser({\n  user: "mongoRestore",\n  pwd: passwordPrompt(),\n  roles: [\n    { role: "restore", db: "admin" }\n  ]\n})'}
       />
       <p>
-        Use this account manually during recovery. Record servers should continue using
+        Use this account manually during recovery. Application servers should continue using
         their normal least-privilege database user.
       </p>
 
@@ -167,10 +167,10 @@ const mongodbBackupRecovery: BlogPost = {
       <h2>14. Accidentally deleted data: what to do first</h2>
       <p>
         If someone runs an incorrect <code>deleteMany()</code>, update, migration or
-        record action, do not immediately restore the entire production database.
+        application action, do not immediately restore the entire production database.
       </p>
       <ol>
-        <li>Stop or restrict the record path that is continuing to damage the data.</li>
+        <li>Stop or restrict the application path that is continuing to damage the data.</li>
         <li>Record the approximate deletion time.</li>
         <li>Do not delete the current production database.</li>
         <li>Create an emergency backup of the current state.</li>
@@ -285,14 +285,14 @@ const mongodbBackupRecovery: BlogPost = {
         code={'const recovery = db.getSiblingDB("appdb_recovery");\nconst production = db.getSiblingDB("appdb");\n\nconst doc = recovery.records.findOne({\n  _id: ObjectId("REPLACE_WITH_ID")\n});\n\nif (doc && !production.records.findOne({ _id: doc._id })) {\n  production.records.insertOne(doc);\n}'}
       />
       <p>
-        Check related collections as well. An record may have linked related records,
-        related records, history, audit logs or other records that also need recovery.
+        Check related collections as well. A document may have linked child records, history,
+        audit logs or other related data that also needs recovery.
       </p>
 
       <h2>22. Full database rollback is the destructive option</h2>
       <p>
         Use this only when you intentionally want production to match the selected backup.
-        Stop record writes first and create the emergency pre-recovery dump.
+        Stop application writes first and create the emergency pre-recovery dump.
       </p>
       <CodeBlock
         language="bash"
@@ -335,7 +335,7 @@ const mongodbBackupRecovery: BlogPost = {
       <ul>
         <li>Keep the backup server separate from the MongoDB server.</li>
         <li>Use a private network, IPsec or another trusted path to MongoDB.</li>
-        <li>Use a dedicated backup account instead of record or cluster-admin credentials.</li>
+        <li>Use a dedicated backup account instead of application or cluster-admin credentials.</li>
         <li>Keep restore credentials separate from automated backup credentials.</li>
         <li>Use compressed archive files rather than permanently storing extracted dumps.</li>
         <li>Prevent overlapping jobs with a lock.</li>
