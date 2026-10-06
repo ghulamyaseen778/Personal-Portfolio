@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://personal-portfolio-omega-swart-29.vercel.app/sitemap.xml
+Sitemap: https://ghulamyaseen.site/sitemap.xml
