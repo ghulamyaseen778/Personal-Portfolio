@@ -14,10 +14,11 @@ const mongodbBackupRecovery: BlogPost = {
   content: (
     <>
       <p>
-        A database backup is useful only when it is automated, stored away from the database
-        server and tested for recovery. This guide builds a practical MongoDB backup system
-        where a separate Ubuntu backup server creates a compressed archive every 15 minutes
-        and automatically removes archives older than seven days.
+        A MongoDB backup is useful only when it is automated, stored away from the database
+        server and tested for recovery. This guide shows how to back up MongoDB with
+        <code>mongodump</code>, create compressed archives every 15 minutes on a separate
+        Ubuntu backup server, keep seven days of retention, restore with
+        <code>mongorestore</code>, and recover accidentally deleted MongoDB data safely.
       </p>
 
       <blockquote>
@@ -144,7 +145,7 @@ const mongodbBackupRecovery: BlogPost = {
         code={"sudo chown root:root /usr/local/sbin/mongodb-backup.sh\nsudo chmod 700 /usr/local/sbin/mongodb-backup.sh\n\nsudo /usr/local/sbin/mongodb-backup.sh\n\nsudo tail -n 50 /var/log/mongodb-backup.log\nls -lh /srv/mongodb-backups"}
       />
 
-      <h2>12. Schedule a backup every 15 minutes</h2>
+      <h2>12. How to back up MongoDB automatically every 15 minutes</h2>
       <CodeBlock language="bash" code={"sudo crontab -e"} />
       <p>Add:</p>
       <CodeBlock language="cron" code={"*/15 * * * * /usr/local/sbin/mongodb-backup.sh"} />
@@ -164,7 +165,7 @@ const mongodbBackupRecovery: BlogPost = {
         an archive into a temporary database and reading the restored data.
       </p>
 
-      <h2>14. Accidentally deleted data: what to do first</h2>
+      <h2>14. How to recover accidentally deleted MongoDB data</h2>
       <p>
         If someone runs an incorrect <code>deleteMany()</code>, update, migration or
         application action, do not immediately restore the entire production database.
