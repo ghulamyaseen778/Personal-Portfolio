@@ -1291,3 +1291,15 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Optional enhancements keep original hero, projects and articles intact. */
+.socialIcons{display:flex;align-items:center;gap:10px;margin:24px 0 2px}
+.socialIcons a{height:40px;width:40px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.13);border-radius:12px;background:rgba(255,255,255,.035);color:#b3c7d7;font-size:19px;transition:.2s}
+.socialIcons a:hover,.socialIcons a:focus-visible{color:#7dd3fc;border-color:rgba(125,211,252,.45);transform:translateY(-2px)}
+.practiceHomeBanner{margin:30px 0 22px;padding:26px;border:1px solid rgba(125,211,252,.2);border-radius:20px;background:linear-gradient(110deg,rgba(125,211,252,.075),rgba(167,139,250,.045));display:flex;align-items:center;justify-content:space-between;gap:24px}
+.practiceHomeBanner>div>span{font:10px "JetBrains Mono",monospace;letter-spacing:.09em;color:#7dd3fc}
+.practiceHomeBanner h3{margin:11px 0;font:600 clamp(19px,2.3vw,28px) "Sora",sans-serif;color:#f4f8fd}
+.practiceHomeBanner p{max-width:650px;color:#9cabb9;font-size:13px;line-height:1.7}
+.practiceHomeBanner a{display:inline-flex;align-items:center;gap:9px;white-space:nowrap;padding:13px 17px;color:#071017;background:#dff6ff;border-radius:12px;font-size:12px;font-weight:650}
+@media(max-width:720px){.practiceHomeBanner{flex-direction:column;align-items:flex-start}.practiceHomeBanner a{white-space:normal}}
