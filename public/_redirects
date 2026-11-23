@@ -1,0 +1,3 @@
+# React Router: let client-side routes resolve to the Vite app.
+# Netlify copies this file into dist/_redirects during npm run build.
+/*    /index.html   200
