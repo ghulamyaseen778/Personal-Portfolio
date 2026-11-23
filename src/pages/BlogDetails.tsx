@@ -2,6 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
 import { FiArrowLeft, FiArrowUpRight } from "react-icons/fi";
 import { blogs } from "../blog";
+import { getLab } from "../practice/labs";
 import { absoluteUrl, AUTHOR_NAME, SITE_NAME } from "../config/site";
 import styles from "../components/Blog/Blog.module.css";
 
@@ -162,6 +163,13 @@ export default function BlogDetail() {
               {blog.tags.map((tag) => <span key={tag}>{tag}</span>)}
             </div>
           </header>
+
+          {getLab(blog.slug) && (
+            <Link className={styles.practiceBanner} to={"/practice/" + blog.slug}>
+              <span><strong>Learn by doing · Practice Lab</strong><small>{getLab(blog.slug)?.challenges.length} guided challenges, instant feedback{blog.category === "Database" ? " and a safe sandbox" : ""}.</small></span>
+              <FiArrowUpRight />
+            </Link>
+          )}
 
           <div className={styles.content}>
             {blog.content}
