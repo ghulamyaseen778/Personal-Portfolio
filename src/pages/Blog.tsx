@@ -57,6 +57,7 @@ export default function BlogPage() {
       <main className={styles.page}>
         <header className={styles.topbar}>
           <Link to="/" className={styles.back}><FiArrowLeft /> Portfolio</Link>
+          <Link to="/practice" className={styles.back}>Practice Lab <FiArrowUpRight /></Link>
         </header>
 
         <section className={styles.blogHero}>
