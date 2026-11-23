@@ -5,6 +5,7 @@ import BlogDetail from "../pages/BlogDetails";
 import ProjectDetails from "../pages/ProjectDetails";
 import NotFound from "../pages/NotFound";
 import PracticeLab from "../pages/PracticeLab";
+import MongoQuest from "../pages/MongoQuest";
 
 const mongodbBackupCanonical = "/blog/mongodb-automated-backup-recovery";
 
@@ -13,6 +14,7 @@ export const router = createBrowserRouter([
   { path: "/projects/:slug", element: <ProjectDetails /> },
   { path: "/blog", element: <BlogPage /> },
   { path: "/practice", element: <PracticeLab /> },
+  { path: "/practice/mongodb-quest", element: <MongoQuest /> },
   { path: "/practice/:slug", element: <PracticeLab /> },
 
   // Search-friendly aliases and old links redirect to one canonical article URL.

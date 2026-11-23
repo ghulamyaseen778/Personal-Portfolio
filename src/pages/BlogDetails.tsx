@@ -165,8 +165,8 @@ export default function BlogDetail() {
           </header>
 
           {getLab(blog.slug) && (
-            <Link className={styles.practiceBanner} to={"/practice/" + blog.slug}>
-              <span><strong>Learn by doing · Practice Lab</strong><small>{getLab(blog.slug)?.challenges.length} guided challenges, instant feedback{blog.category === "Database" ? " and a safe sandbox" : ""}.</small></span>
+            <Link className={styles.practiceBanner} to={blog.slug === "mongodb-queries-operators-aggregation-guide" ? "/practice/mongodb-quest" : "/practice/" + blog.slug}>
+              <span><strong>{blog.slug === "mongodb-queries-operators-aggregation-guide" ? "Play MongoDB Query Quest · 12 levels" : "Learn by doing · Practice Lab"}</strong><small>{blog.slug === "mongodb-queries-operators-aggregation-guide" ? "Build real queries, earn XP, unlock levels and understand every operator." : getLab(blog.slug)?.challenges.length + " guided challenges with instant feedback."}</small></span>
               <FiArrowUpRight />
             </Link>
           )}
