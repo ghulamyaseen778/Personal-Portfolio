@@ -37,6 +37,17 @@ export default function MongoQuest() {
   const totalStars = Object.values(progress.bestStars).reduce((total, value) => total + value, 0);
   const xp = totalStars * 35;
   const source = level.source === "users" ? sampleUsers : sampleOrders;
+  const stageTrace = useMemo(() => {
+    if (level.mode !== "pipeline" || !preview?.pipeline || !result) return [];
+    return preview.pipeline.map((stage, index) => {
+      try {
+        const rows = executeQuery({ collection: level.source, filter: {}, pipeline: preview.pipeline!.slice(0, index + 1) });
+        return { name: Object.keys(stage)[0], count: rows.length, preview: rows.slice(0, 2), error: "" };
+      } catch (error) {
+        return { name: Object.keys(stage)[0], count: 0, preview: [], error: error instanceof Error ? error.message : "Unsupported stage" };
+      }
+    });
+  }, [level, preview, result]);
 
   useEffect(() => {
     try {
@@ -266,6 +277,21 @@ export default function MongoQuest() {
                       <div><span>Your query · {result.output.length} result(s)</span><pre>{format(result.output)}</pre></div>
                       {!result.correct && <div><span>Mission target · {result.expected.length} result(s)</span><pre>{format(result.expected)}</pre></div>}
                     </div>
+                    <div className={styles.reasonSteps}>
+                      <strong>How your selected operators work</strong>
+                      {level.slots.map(slot => {
+                        const picked = slot.options.find(option => option.id === selected[slot.id]);
+                        if (!picked) return null;
+                        return <p key={slot.id}><code>{picked.code}</code><span>{picked.meaning}</span></p>;
+                      })}
+                    </div>
+                    {stageTrace.length > 0 && <div className={styles.stageTrace}>
+                      <strong>Pipeline execution — step by step</strong>
+                      {stageTrace.map((step, index) => <div className={styles.stageTraceItem} key={index}>
+                        <span>{index + 1}. <code>{step.name}</code> → {step.error ? step.error : step.count + " document(s)"}</span>
+                        {!step.error && <pre>{format(step.preview)}</pre>}
+                      </div>)}
+                    </div>}
                     {result.correct && <div className={styles.nextActions}>
                       <button type="button" className={styles.secondary} onClick={resetMission}><FiRefreshCcw /> Replay level</button>
                       {current < mongoQuestLevels.length - 1
