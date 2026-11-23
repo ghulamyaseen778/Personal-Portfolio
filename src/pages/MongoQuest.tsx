@@ -37,17 +37,6 @@ export default function MongoQuest() {
   const totalStars = Object.values(progress.bestStars).reduce((total, value) => total + value, 0);
   const xp = totalStars * 35;
   const source = level.source === "users" ? sampleUsers : sampleOrders;
-  const stageTrace = useMemo(() => {
-    if (level.mode !== "pipeline" || !preview?.pipeline || !result) return [];
-    return preview.pipeline.map((stage, index) => {
-      try {
-        const rows = executeQuery({ collection: level.source, filter: {}, pipeline: preview.pipeline!.slice(0, index + 1) });
-        return { name: Object.keys(stage)[0], count: rows.length, preview: rows.slice(0, 2), error: "" };
-      } catch (error) {
-        return { name: Object.keys(stage)[0], count: 0, preview: [], error: error instanceof Error ? error.message : "Unsupported stage" };
-      }
-    });
-  }, [level, preview, result]);
 
   useEffect(() => {
     try {
@@ -78,6 +67,19 @@ export default function MongoQuest() {
     try { return compileQuest(level, selected); }
     catch { return null; }
   }, [available, level, selected]);
+
+  const stageTrace = useMemo(() => {
+    if (level.mode !== "pipeline" || !preview?.pipeline || !result) return [];
+    return preview.pipeline.map((stage, index) => {
+      try {
+        const rows = executeQuery({ collection: level.source, filter: {}, pipeline: preview.pipeline!.slice(0, index + 1) });
+        return { name: Object.keys(stage)[0], count: rows.length, preview: rows.slice(0, 2), error: "" };
+      } catch (error) {
+        return { name: Object.keys(stage)[0], count: 0, preview: [], error: error instanceof Error ? error.message : "Unsupported stage" };
+      }
+    });
+  }, [level, preview, result]);
+
 
   const transitionTo = (index: number) => {
     if (index > unlocked - 1) return;
