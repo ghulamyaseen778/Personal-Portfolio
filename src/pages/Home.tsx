@@ -21,6 +21,8 @@ import {
   FiZap
 } from "react-icons/fi";
 import SEO from "../components/SEO/SEO";
+import { FiLinkedin, FiFacebook, FiInstagram } from "react-icons/fi";
+import { blogs } from "../blog";
 import { projects } from "../data/projects";
 import { certificates } from "../data/certificates";
 import styles from "./Home.module.css";
@@ -31,7 +33,8 @@ const navLinks = [
   { label: "Experience", href: "#experience" },
   { label: "Expertise", href: "#expertise" },
   { label: "AI", href: "#ai-systems" },
-  { label: "Articles", href: "#articles" }
+  { label: "Articles", href: "#articles" },
+  { label: "Practice Lab", href: "/practice" }
 ];
 
 const projectTabs = [
@@ -162,6 +165,13 @@ const aiSystems = [
 ];
 
 const articles = [
+  {
+    category: "Database",
+    readTime: "45 min read",
+    title: "MongoDB Queries, $ Operators & Aggregation",
+    description: "Explore CRUD, filters, expressions, joins, aggregation pipelines, indexes and real-world combinations with hands-on examples.",
+    href: "/blog/mongodb-queries-operators-aggregation-guide"
+  },
   {
     category: "Database",
     readTime: "20 min read",
@@ -342,6 +352,13 @@ export default function Home() {
                 >
                   <FiGithub /> GitHub
                 </a>
+              </motion.div>
+
+              <motion.div className={styles.socialIcons} aria-label="Social profiles">
+                <a href="https://www.linkedin.com/in/gyaseen/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><FiLinkedin /></a>
+                <a href="https://www.facebook.com/muhammad.yaseenattari.96" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><FiFacebook /></a>
+                <a href="https://www.instagram.com/ghulamyaseen7043/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><FiInstagram /></a>
+                <a href="https://github.com/ghulamyaseen778" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><FiGithub /></a>
               </motion.div>
 
               <motion.div
@@ -663,6 +680,11 @@ export default function Home() {
               </div>
               <a className={styles.viewAllLink} href="/blog">All articles <FiArrowUpRight /></a>
             </motion.div>
+
+            <div className={styles.practiceHomeBanner}>
+              <div><span>LEARN BY DOING</span><h3>Practice Lab · Interactive Engineering</h3><p>Explore hands-on exercises connected to {blogs.length} articles, including MongoDB operators, React architecture, security, CI/CD and simulated backend responses.</p></div>
+              <a href="/practice">Explore practice lab <FiArrowUpRight /></a>
+            </div>
 
             <div className={styles.articleGrid}>
               {articles.map((article, index) => (
