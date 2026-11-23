@@ -318,3 +318,10 @@
 @media (max-width: 480px) {
   .topbar,.blogHero,.categories,.grid,.articleWrapper { width: min(100% - 28px, 1120px); }
 }
+
+
+/* Article-to-practice entry point, additive to the existing article design. */
+.practiceBanner{display:flex;justify-content:space-between;align-items:center;gap:18px;margin:30px 0 6px;padding:20px 24px;background:linear-gradient(120deg,rgba(125,211,252,.09),rgba(167,139,250,.05));border:1px solid rgba(125,211,252,.25);border-radius:16px;text-decoration:none;color:#e9f8ff;transition:border-color .2s,transform .2s}
+.practiceBanner:hover{border-color:#7dd3fc;transform:translateY(-2px)}
+.practiceBanner span{display:grid;gap:6px}.practiceBanner strong{font:600 15px "Sora",sans-serif}.practiceBanner small{font-size:12px;line-height:1.6;color:#9aaabc}.practiceBanner>svg{color:#7dd3fc;flex-shrink:0;font-size:22px}
+@media(max-width:520px){.practiceBanner{padding:18px}}
